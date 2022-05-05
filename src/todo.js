@@ -12,16 +12,23 @@ export default function Todo() {
     const [item, setItem] = useState([]);
     // const [Pageload, setPageload]=useState(false)
     const [Submittoggle, setSubmittoggle] = useState(true);
+    const [Pagerefresh, setPageRefresh] = useState(false);
+
     const [isEditItem, setIsEditItem] = useState(null)
     const [id, setId] = useState()
 
     const { Moralis, user, setUserData, isUserUpdating } = useMoralis();
-    const { data } = useMoralisQuery("TodoItems");    //---For fetching(Get)the data from moralis
+    const { data, fetch } = useMoralisQuery("TodoItems");    //---For fetching(Get)the data from moralis
 
-
+    useEffect(() => {
+        fetch();
+    }, [Pagerefresh]);
 
     // Add item moralis ----------------------------------------------->
-    const addItem = () => {
+    const addItem = (event) => {
+        // event.preventDefault();
+
+
         if (!inputData) {
             alert("Please Fill the field");
         } else if (inputData && !Submittoggle) {
@@ -39,13 +46,16 @@ export default function Todo() {
 
 
         } else {
+            // event.preventDefault();
+
             setSubmittoggle(true);
-            setItem([...item, inputData])
+            setItem([inputData])
             setInputData('')
             setIsEditItem(null)
+
         }
 
-
+        setPageRefresh(!Pagerefresh);
     }
 
     // ---------------------------Crete obj in moralis------------------------
@@ -58,10 +68,11 @@ export default function Todo() {
     }, [item])
 
     const definenewMoralisobj = () => {
+
         // alert("called")
 
         item.map(async (Mdata) => {
-            // console.log(todoItem, 'todooo');
+            console.log(item, 'itemmm');
 
             if (Submittoggle) {
                 const TodoItems = Moralis.Object.extend("TodoItems");
@@ -103,6 +114,8 @@ export default function Todo() {
                 console.log(error);
             })
         }
+        setPageRefresh(!Pagerefresh);
+
     }
 
     // -------------------------EDIT data------------------------------------------
@@ -137,9 +150,9 @@ export default function Todo() {
 
                     {
                         Submittoggle ?
-                            <button className='btn' onClick={addItem}>Submit</button>
+                            <button className='btn' onClick={(event) => addItem(event)}>Submit</button>
                             :
-                            <button className='btn' onClick={addItem}>Update Data</button>
+                            <button className='btn' onClick={(event) => addItem(event)}>Update Data</button>
                     }
                     {/* {console.log(item)} */}
                 </div>
